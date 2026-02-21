@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Beautiful Moments</title>
+    
+    <!-- Google Fonts for Romantic Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Quicksand:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Quicksand', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif'],
+                        cursive: ['Dancing Script', 'cursive'],
+                    },
+                    colors: {
+                        romantic: {
+                            50: '#fff0f3',
+                            100: '#ffe3e8',
+                            200: '#ffcdd7',
+                            300: '#ffa6b8',
+                            400: '#ff7390',
+                            500: '#ff3d66',
+                            600: '#f41b4a',
+                            700: '#cd0e36',
+                            800: '#aa1031',
+                            900: '#8f122e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Styles & Animations */
+        body {
+            background: linear-gradient(135deg, #fff0f3 0%, #ffe3e8 50%, #fff0f3 100%);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #fff0f3;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ffa6b8;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff7390;
+        }
+
+        /* Polaroid Card Effect */
+        .polaroid {
+            background: white;
+            padding: 12px 12px 50px 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        
+        /* Show animation triggered by JS Intersection Observer */
+        .polaroid.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .polaroid:hover {
+            transform: scale(1.05) rotate(0deg) !important;
+            z-index: 50;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        }
+
+        .polaroid img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            aspect-ratio: 1 / 1;
+            filter: contrast(1.05) saturate(1.1);
+        }
+
+        .polaroid-caption {
+            position: absolute;
+            bottom: 12px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: #4a4a4a;
+        }
+
+        /* Floating Hearts Animation */
+        .heart {
+            position: fixed;
+            color: #ffa6b8;
+            opacity: 0.6;
+            animation: floatUp linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(100vh) scale(0.5) rotate(0deg); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-20vh) scale(1.2) rotate(360deg); opacity: 0; }
+        }
+
+        /* Music Button Pulse */
+        @keyframes pulse-soft {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255, 115, 144, 0.4); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255, 115, 144, 0); }
+        }
+        .music-btn {
+            animation: pulse-soft 2s infinite;
+        }
+        .music-btn.playing {
+            animation: none;
+            background-color: #ff3d66;
+            color: white;
+        }
+
+        /* Typewriter effect for header */
+        .typewriter-text {
+            overflow: hidden;
+            white-space: nowrap;
+            margin: 0 auto;
+            border-right: 2px solid #ff3d66;
+            animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: #ff3d66; }
+        }
+    </style>
+</head>
+<body class="text-gray-800 antialiased font-sans relative">
+
+    <!-- Floating Background Hearts Container -->
+    <div id="hearts-container"></div>
+
+    <!-- Music Player -->
+    <!-- EDIT THIS: You can replace the src with your own romantic mp3 link -->
+    <audio id="bg-music" loop>
+        <source src="https://upload.wikimedia.org/wikipedia/commons/e/e1/Claude_Debussy_-_Clair_de_lune_%28played_by_Caio_Fac%C3%B3%29.ogg" type="audio/ogg">
+    </audio>
+
+    <button id="music-toggle" class="music-btn fixed bottom-6 right-6 z-50 bg-white text-romantic-500 p-4 rounded-full shadow-xl hover:bg-romantic-50 transition-colors flex items-center justify-center cursor-pointer border border-romantic-100">
+        <i class="ph-fill ph-music-notes text-2xl"></i>
+    </button>
+
+    <!-- Hero Section -->
+    <header class="min-h-screen flex flex-col items-center justify-center relative px-6 text-center">
+        <div class="max-w-3xl mx-auto z-10 fade-in-section">
+            <h2 class="text-romantic-500 font-sans tracking-widest uppercase text-sm font-semibold mb-4">A Journey of Love</h2>
+            <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl text-romantic-900 mb-6 leading-tight">
+                Our Beautiful <br/> <span class="font-cursive text-romantic-600">Moments</span>
+            </h1>
+            <p class="font-sans text-lg md:text-xl text-gray-600 max-w-xl mx-auto mb-10 leading-relaxed">
+                Every second spent with you feels like a dream. Here is a little collection of my favorite memories we've built together.
+            </p>
+            
+            <a href="#gallery" class="inline-flex flex-col items-center text-romantic-400 hover:text-romantic-600 transition-colors">
+                <span class="text-sm font-medium mb-2">Open the Album</span>
+                <i class="ph ph-caret-down text-2xl animate-bounce"></i>
+            </a>
+        </div>
+    </header>
+
+    <!-- Gallery Section -->
+    <!-- EDIT THIS: Change the img src to your own photos, and edit the text in the caption div -->
+    <section id="gallery" class="py-20 px-6 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-14">
+            
+            <!-- Photo 1 -->
+            <div class="polaroid" style="transform: rotate(-3deg); transition-delay: 100ms;">
+                <img src="https://images.unsplash.com/photo-1518199266791-5375a83164ba?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Holding hands">
+                <div class="polaroid-caption font-cursive text-3xl">The beginning...</div>
+            </div>
+
+            <!-- Photo 2 -->
+            <div class="polaroid" style="transform: rotate(2deg); transition-delay: 200ms;">
+                <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Beautiful landscape">
+                <div class="polaroid-caption font-cursive text-3xl">Our first trip</div>
+            </div>
+
+            <!-- Photo 3 -->
+            <div class="polaroid" style="transform: rotate(-1deg); transition-delay: 300ms;">
+                <img src="https://images.unsplash.com/photo-1494774157365-9e04c6720e47?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Coffee date">
+                <div class="polaroid-caption font-cursive text-3xl">Cozy dates</div>
+            </div>
+
+            <!-- Photo 4 -->
+            <div class="polaroid" style="transform: rotate(4deg); transition-delay: 100ms;">
+                <img src="https://images.unsplash.com/photo-1501901609772-df0848060b33?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Picnic">
+                <div class="polaroid-caption font-cursive text-3xl">Summer smiles</div>
+            </div>
+
+            <!-- Photo 5 -->
+            <div class="polaroid" style="transform: rotate(-4deg); transition-delay: 200ms;">
+                <img src="https://images.unsplash.com/photo-1515934751635-c81c6bc9a2d8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Soft lights">
+                <div class="polaroid-caption font-cursive text-3xl">Endless laughs</div>
+            </div>
+
+            <!-- Photo 6 -->
+            <div class="polaroid" style="transform: rotate(1deg); transition-delay: 300ms;">
+                <img src="https://images.unsplash.com/photo-1606905584573-ce562a5b78f4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Sunset">
+                <div class="polaroid-caption font-cursive text-3xl">Forever to go</div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- Love Letter Section -->
+    <section class="py-24 px-6 relative">
+        <div class="max-w-2xl mx-auto bg-white/60 backdrop-blur-sm p-10 md:p-14 rounded-3xl shadow-xl border border-white relative z-10 fade-in-section">
+            <i class="ph-fill ph-quotes text-4xl text-romantic-300 absolute top-8 left-8 opacity-50"></i>
+            <h3 class="font-serif text-3xl md:text-4xl text-romantic-900 mb-6 text-center">To My Everything</h3>
+            <div class="space-y-4 font-sans text-gray-700 leading-relaxed text-lg">
+                <p>
+                    I made this page because sometimes simple words aren't enough to show you how much you mean to me. Looking back at these photos reminds me of how lucky I am.
+                </p>
+                <p>
+                    Every laugh, every trip, every quiet night in—they are the chapters of the best story I've ever known. I love you more than words can say, and I can't wait to fill countless more albums with you.
+                </p>
+            </div>
+            <div class="mt-10 text-right">
+                <p class="font-cursive text-4xl text-romantic-600">With all my heart,</p>
+                <p class="font-sans font-medium text-gray-500 mt-2">Your Name Here</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center py-10 pb-20 text-sm text-gray-400 font-sans">
+        <p>Made with <i class="ph-fill ph-heart text-romantic-500"></i> just for you.</p>
+    </footer>
+
+    <!-- Interactive Scripts -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Music Player Logic
+            const musicBtn = document.getElementById('music-toggle');
+            const bgMusic = document.getElementById('bg-music');
+            const musicIcon = musicBtn.querySelector('i');
+            let isPlaying = false;
+
+            // Lower volume for soft background ambiance
+            bgMusic.volume = 0.4;
+
+            musicBtn.addEventListener('click', () => {
+                if (isPlaying) {
+                    bgMusic.pause();
+                    musicBtn.classList.remove('playing');
+                    musicIcon.classList.replace('ph-pause', 'ph-music-notes');
+                } else {
+                    bgMusic.play().catch(e => console.log("Audio play failed:", e));
+                    musicBtn.classList.add('playing');
+                    musicIcon.classList.replace('ph-music-notes', 'ph-pause');
+                }
+                isPlaying = !isPlaying;
+            });
+
+            // 2. Floating Hearts Background Generator
+            const heartsContainer = document.getElementById('hearts-container');
+            const heartIcons = ['ph-heart', 'ph-heart-straight'];
+            
+            function createHeart() {
+                const heart = document.createElement('i');
+                // Randomly choose heart icon style
+                const iconClass = heartIcons[Math.floor(Math.random() * heartIcons.length)];
+                heart.className = `ph-fill ${iconClass} heart`;
+                
+                // Random positioning and sizing
+                const size = Math.random() * 1.5 + 0.5; // 0.5rem to 2rem
+                const left = Math.random() * 100; // 0% to 100%
+                const duration = Math.random() * 5 + 5; // 5s to 10s
+                
+                heart.style.fontSize = `${size}rem`;
+                heart.style.left = `${left}vw`;
+                heart.style.animationDuration = `${duration}s`;
+                
+                heartsContainer.appendChild(heart);
+                
+                // Remove after animation completes to keep DOM clean
+                setTimeout(() => {
+                    heart.remove();
+                }, duration * 1000);
+            }
+
+            // Create hearts periodically
+            setInterval(createHeart, 600);
+            
+            // Create some initial hearts instantly
+            for(let i=0; i<10; i++) {
+                setTimeout(createHeart, Math.random() * 2000);
+            }
+
+            // 3. Scroll Animation (Intersection Observer)
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.15
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        // Apply rotation preservation for polaroids
+                        if(entry.target.classList.contains('polaroid')) {
+                            // The CSS transition handles the smooth fade up
+                            entry.target.classList.add('show');
+                        } else {
+                            // General fade in for other sections
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                            entry.target.style.transition = 'all 1s ease-out';
+                        }
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            // Observe Polaroids
+            document.querySelectorAll('.polaroid').forEach(el => {
+                observer.observe(el);
+            });
+
+            // Observe the Love Letter section
+            document.querySelectorAll('.fade-in-section').forEach(el => {
+                // Initialize state for non-polaroid animated elements
+                if(!el.classList.contains('polaroid')) {
+                    el.style.opacity = '0';
+                    el.style.transform = 'translateY(20px)';
+                }
+                observer.observe(el);
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
